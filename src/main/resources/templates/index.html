@@ -1,31 +1,41 @@
-
 <!DOCTYPE html>
-<html>
-<head><title>Student CRUD</title></head>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Student CRUD</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
 <body>
-<h2>Student Management</h2>
+    <div class="container">
+        <h2>Student Management</h2>
+        <form class="card form-row" action="/add" method="post">
+            <input name="rollNo" placeholder="Roll No" required />
+            <input name="name" placeholder="Name" required />
+            <input name="semester" type="number" placeholder="Semester" required />
+            <input name="cgpa" type="number" step="0.01" placeholder="CGPA" required />
+            <input name="phoneNumber" placeholder="Phone Number" required />
+            <button type="submit">Add Student</button>
+        </form>
 
-<form action="/add" method="post">
-    <input name="rollNo" placeholder="Roll No" required />
-    <input name="name" placeholder="Name" required />
-    <input name="semester" type="number" placeholder="Semester" required />
-    <input name="cgpa" type="number" step="0.01" placeholder="CGPA" required />
-    <input name="phoneNumber" placeholder="Phone Number" required />
-    <button type="submit">Add Student</button>
-</form>
+        <form class="card form-row" action="/delete" method="post">
+            <input name="rollNo" placeholder="Roll No" required />
+            <button class="btn-danger" type="submit">Delete Student</button>
+        </form>
 
-<form action="/delete" method="post">
-    <input name="rollNo" placeholder="Roll No" required />
-    <button type="submit">Delete Student</button>
-</form>
+        <div class="card form-row">
+            <a href="/display"><button type="button">Display All Students</button></a>
+        </div>
 
-<a href="/display"><button>Display All Students</button></a>
+        <form class="card form-row" action="/display/" method="get"
+            onsubmit="event.preventDefault(); window.location='/display/' + this.rollNo.value;">
+            <input name="rollNo" placeholder="Roll No" required />
+            <button class="btn-secondary" type="submit">Display One Student</button>
+        </form>
 
-<form action="/display/" method="get" onsubmit="event.preventDefault(); window.location='/display/' + this.rollNo.value;">
-    <input name="rollNo" placeholder="Roll No" required />
-    <button type="submit">Display One Student</button>
-</form>
-
-<p th:text="${message}"></p>
+        <p class="message" th:text="${message}"></p>
+    </div>
 </body>
+
 </html>
