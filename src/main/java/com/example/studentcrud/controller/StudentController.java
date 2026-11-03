@@ -33,6 +33,28 @@ public class StudentController {
         return "index";
     }
 
+    @GetMapping("/edit/{rollNo}")
+    public String editStudent(@PathVariable String rollNo, Model model) {
+        Student student = repository.findById(rollNo).orElse(null);
+        if (student == null) {
+            model.addAttribute("message", "Student not found!");
+            return "index";
+        }
+        model.addAttribute("student", student);
+        return "edit";
+    }
+
+    @PostMapping("/update")
+    public String updateStudent(@ModelAttribute Student student, Model model) {
+        if (!repository.existsById(student.getRollNo())) {
+            model.addAttribute("message", "Student not found!");
+            return "index";
+        }
+        repository.save(student);
+        model.addAttribute("message", "Student Updated!");
+        return "index";
+    }
+
     @GetMapping("/display")
     public String displayAll(Model model) {
         model.addAttribute("students", repository.findAll());

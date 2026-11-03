@@ -10,6 +10,7 @@
     <p><b>Semester:</b> <span th:text="${student.semester}"></span></p>
     <p><b>CGPA:</b> <span th:text="${student.cgpa}"></span></p>
     <p><b>Phone:</b> <span th:text="${student.phoneNumber}"></span></p>
+    <p><a th:href="@{/edit/{rollNo}(rollNo=${student.rollNo})}">Update Student</a></p>
 </div>
 <div th:if="${student == null}">
     <p>No student found.</p>
