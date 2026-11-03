@@ -20,11 +20,20 @@ public class StudentController {
     }
 
     @PostMapping("/add")
-    public String addStudent(@ModelAttribute Student student, Model model) {
-        repository.save(student);
-        model.addAttribute("message", "Student Added!");
+public String addStudent(@ModelAttribute Student student, Model model) {
+
+    // Kiểm tra mã sinh viên đã tồn tại
+    if (repository.existsById(student.getRollNo())) {
+        model.addAttribute("message", "Roll number already exists!");
         return "index";
     }
+
+    // Nếu chưa tồn tại thì thêm mới
+    repository.save(student);
+
+    model.addAttribute("message", "Student Added!");
+    return "index";
+}
 
     @PostMapping("/delete")
     public String deleteStudent(@RequestParam String rollNo, Model model) {
