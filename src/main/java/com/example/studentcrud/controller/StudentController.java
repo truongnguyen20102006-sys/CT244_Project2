@@ -1,4 +1,3 @@
-
 package com.example.studentcrud.controller;
 
 import com.example.studentcrud.model.Student;
@@ -20,24 +19,46 @@ public class StudentController {
     }
 
     @PostMapping("/add")
-public String addStudent(@ModelAttribute Student student, Model model) {
+    public String addStudent(@ModelAttribute Student student, Model model) {
 
-    // Kiểm tra mã sinh viên đã tồn tại
-    if (repository.existsById(student.getRollNo())) {
-        model.addAttribute("message", "Roll number already exists!");
+        // Kiểm tra dữ liệu nhập
+        if (student.getRollNo() == null || student.getRollNo().trim().isEmpty()
+                || student.getName() == null || student.getName().trim().isEmpty()
+                || student.getSemester() <= 0
+                || student.getCgpa() < 0 || student.getCgpa() > 10
+                || student.getPhoneNumber() == null
+                || !student.getPhoneNumber().matches("\\d{10,11}")) {
+
+            model.addAttribute("message", "Invalid student information!");
+            return "index";
+        }
+
+        student.setRollNo(student.getRollNo().trim());
+        student.setName(student.getName().trim());
+        student.setPhoneNumber(student.getPhoneNumber().trim());
+
+        // Kiểm tra mã sinh viên đã tồn tại
+        if (repository.existsById(student.getRollNo())) {
+            model.addAttribute("message", "Roll number already exists!");
+            return "index";
+        }
+
+        repository.save(student);
+
+        model.addAttribute("message", "Student Added!");
         return "index";
     }
 
-    // Nếu chưa tồn tại thì thêm mới
-    repository.save(student);
-
-    model.addAttribute("message", "Student Added!");
-    return "index";
-}
-
     @PostMapping("/delete")
     public String deleteStudent(@RequestParam String rollNo, Model model) {
-        repository.deleteById(rollNo);
+
+        if (rollNo == null || rollNo.trim().isEmpty()
+                || !repository.existsById(rollNo.trim())) {
+            model.addAttribute("message", "Student not found!");
+            return "index";
+        }
+
+        repository.deleteById(rollNo.trim());
         model.addAttribute("message", "Student Deleted!");
         return "index";
     }
@@ -45,21 +66,41 @@ public String addStudent(@ModelAttribute Student student, Model model) {
     @GetMapping("/edit/{rollNo}")
     public String editStudent(@PathVariable String rollNo, Model model) {
         Student student = repository.findById(rollNo).orElse(null);
+
         if (student == null) {
             model.addAttribute("message", "Student not found!");
             return "index";
         }
+
         model.addAttribute("student", student);
         return "edit";
     }
 
     @PostMapping("/update")
     public String updateStudent(@ModelAttribute Student student, Model model) {
+
+        if (student.getRollNo() == null || student.getRollNo().trim().isEmpty()
+                || student.getName() == null || student.getName().trim().isEmpty()
+                || student.getSemester() <= 0
+                || student.getCgpa() < 0 || student.getCgpa() > 10
+                || student.getPhoneNumber() == null
+                || !student.getPhoneNumber().matches("\\d{10,11}")) {
+
+            model.addAttribute("message", "Invalid student information!");
+            return "index";
+        }
+
+        student.setRollNo(student.getRollNo().trim());
+        student.setName(student.getName().trim());
+        student.setPhoneNumber(student.getPhoneNumber().trim());
+
         if (!repository.existsById(student.getRollNo())) {
             model.addAttribute("message", "Student not found!");
             return "index";
         }
+
         repository.save(student);
+
         model.addAttribute("message", "Student Updated!");
         return "index";
     }
@@ -72,7 +113,15 @@ public String addStudent(@ModelAttribute Student student, Model model) {
 
     @GetMapping("/display/{rollNo}")
     public String displayById(@PathVariable String rollNo, Model model) {
-        model.addAttribute("student", repository.findById(rollNo).orElse(null));
+
+        Student student = repository.findById(rollNo).orElse(null);
+
+        if (student == null) {
+            model.addAttribute("message", "Student not found!");
+            return "displayOne";
+        }
+
+        model.addAttribute("student", student);
         return "displayOne";
     }
 }
