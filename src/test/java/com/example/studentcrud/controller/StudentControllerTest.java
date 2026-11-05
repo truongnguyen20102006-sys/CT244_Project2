@@ -41,6 +41,7 @@ class StudentControllerTest {
     @Test
     void addStudentShouldSaveAndShowSuccessMessage() throws Exception {
         ArgumentCaptor<Student> captor = ArgumentCaptor.forClass(Student.class);
+        when(repository.existsById("SV001")).thenReturn(false);
 
         mockMvc.perform(post("/add")
                         .param("rollNo", "SV001")
@@ -62,13 +63,60 @@ class StudentControllerTest {
     }
 
     @Test
+    void addStudentShouldRejectDuplicateRollNumber() throws Exception {
+        when(repository.existsById("SV001")).thenReturn(true);
+
+        mockMvc.perform(post("/add")
+                        .param("rollNo", "SV001")
+                        .param("name", "Nguyen Van A")
+                        .param("semester", "5")
+                        .param("cgpa", "3.75")
+                        .param("phoneNumber", "0901234567"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("index"))
+                .andExpect(model().attribute("message", "Roll number already exists!"));
+
+        verify(repository, never()).save(any(Student.class));
+    }
+
+    @Test
+    void addStudentShouldRejectInvalidInformation() throws Exception {
+        mockMvc.perform(post("/add")
+                        .param("rollNo", " ")
+                        .param("name", "")
+                        .param("semester", "0")
+                        .param("cgpa", "11")
+                        .param("phoneNumber", "123"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("index"))
+                .andExpect(model().attribute("message", "Invalid student information!"));
+
+        verify(repository, never()).existsById(any());
+        verify(repository, never()).save(any(Student.class));
+    }
+
+    @Test
     void deleteStudentShouldDeleteAndShowSuccessMessage() throws Exception {
+        when(repository.existsById("SV001")).thenReturn(true);
+
         mockMvc.perform(post("/delete").param("rollNo", "SV001"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"))
                 .andExpect(model().attribute("message", "Student Deleted!"));
 
         verify(repository).deleteById("SV001");
+    }
+
+    @Test
+    void deleteStudentShouldReturnNotFoundWhenStudentDoesNotExist() throws Exception {
+        when(repository.existsById("missing")).thenReturn(false);
+
+        mockMvc.perform(post("/delete").param("rollNo", "missing"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("index"))
+                .andExpect(model().attribute("message", "Student not found!"));
+
+        verify(repository, never()).deleteById(any());
     }
 
     @Test
@@ -120,7 +168,12 @@ class StudentControllerTest {
     void updateStudentShouldReturnIndexWhenStudentDoesNotExist() throws Exception {
         when(repository.existsById("missing")).thenReturn(false);
 
-        mockMvc.perform(post("/update").param("rollNo", "missing"))
+        mockMvc.perform(post("/update")
+                        .param("rollNo", "missing")
+                        .param("name", "Nguyen Van A")
+                        .param("semester", "5")
+                        .param("cgpa", "3.75")
+                        .param("phoneNumber", "0901234567"))
                 .andExpect(status().isOk())
                 .andExpect(view().name("index"))
                 .andExpect(model().attribute("message", "Student not found!"));

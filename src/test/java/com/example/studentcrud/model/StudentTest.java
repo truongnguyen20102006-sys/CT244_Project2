@@ -1,6 +1,11 @@
 package com.example.studentcrud.model;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
 import org.junit.jupiter.api.Test;
+
+import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,5 +36,20 @@ class StudentTest {
         assertThat(student.getSemester()).isEqualTo(5);
         assertThat(student.getCgpa()).isEqualTo(3.75);
         assertThat(student.getPhoneNumber()).isEqualTo("0901234567");
+    }
+
+    @Test
+    void validationShouldRejectInvalidStudentData() {
+        Student student = new Student();
+        student.setRollNo("");
+        student.setName("");
+        student.setSemester(0);
+        student.setCgpa(11.0);
+        student.setPhoneNumber("123");
+
+        Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+        Set<ConstraintViolation<Student>> violations = validator.validate(student);
+
+        assertThat(violations).hasSizeGreaterThanOrEqualTo(5);
     }
 }
